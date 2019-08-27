@@ -1,0 +1,23 @@
+#!/bin/bash
+
+if [ -z "$1" ]; then
+	echo 'Missing file argument.'
+	exit 1
+fi
+
+if [ -z "$2" ]; then
+	echo 'Missing style argument.'
+	exit 1
+fi
+
+dir=$PWD
+file=$1
+style=$2
+keep=$3
+
+while inotifywait -r -e modify $dir; do
+	python -c "import sickninja" $dir $file > $file.scss
+	sass --sourcemap=none --no-cache --style $2 $file.scss $file.css
+	rm $file.scss
+done
+
