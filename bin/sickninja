@@ -1,23 +1,39 @@
 #!/bin/bash
 
 if [ -z "$1" ]; then
-	echo 'Missing file argument.'
+	echo 'Missing infile argument.'
 	exit 1
 fi
 
 if [ -z "$2" ]; then
+	echo 'Missing outfile argument.'
+	exit 1
+fi
+
+if [ -z "$3" ]; then
 	echo 'Missing style argument.'
 	exit 1
 fi
 
-dir=$PWD
-file=$1
-style=$2
-keep=$3
+ifile=$1
+ofile=$2
+style=$3
+watch=$4
+dir=$(dirname $ifile)
 
-while inotifywait -r -e modify $dir; do
-	python -c "import sickninja" $dir $file > $file.scss
-	sass --sourcemap=none --no-cache --style $2 $file.scss $file.css
-	rm $file.scss
-done
+function do_sickninja {
+	python -c "import sickninja" $dir $ifile > $ifile.bin
+	sass --scss --sourcemap=none --no-cache --style $style $ifile.bin $ofile
+	rm $ifile.bin
+}
+
+# Do not watch, just execute
+if [ -z "$watch" ]; then
+	do_sickninja
+# Watch given dir
+else
+	while inotifywait -r -e modify $watch; do
+		do_sickninja
+	done
+fi
 

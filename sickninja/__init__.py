@@ -1,5 +1,6 @@
 from jinja2 import Environment
 from jinja2 import FileSystemLoader
+from jinja2 import select_autoescape
 import os
 import argparse
 
@@ -9,6 +10,7 @@ parser.add_argument('file', help='File to parse.')
 args = parser.parse_args()
 
 sickninja = Environment(
+	autoescape=select_autoescape(['ninja']),
 	loader=FileSystemLoader(args.dir),
 	**{
 		'block_start_string': '<%',
@@ -26,5 +28,5 @@ sickninja = Environment(
 	}
 )
 
-template = sickninja.get_template(f'{args.file}.ninja')
+template = sickninja.get_template(f'{args.file}')
 print(template.render())
